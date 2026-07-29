@@ -54,7 +54,8 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 /* Web UI routes */
-$route['login'] = 'auth/login_page';$route['login/submit'] = 'auth/login'; 
+$route['login'] = 'auth/login_page';
+$route['login/submit'] = 'auth/login';
 $route['logout'] = 'auth/logout_page';
 $route['products'] = 'products/browse';
 $route['products/data'] = 'products/browse_data';
@@ -67,6 +68,25 @@ $route['bills'] = 'bills/browse';
 $route['bills/data'] = 'bills/browse_data';
 $route['bills/detail/(:num)'] = 'bills/detail/$1';
 $route['dashboard/bills/create'] = 'bills/create_form';
+
+$route['/dashboard/bills/detail/(:num)'] = 'bills/detail/$1';
+
+/* Web UI routes for Clients */
+$route['clients'] = 'clients/index';
+$route['dashboard/clients'] = 'clients/index';
+
+/* Web UI routes for Warehouses */
+$route['warehouses/manage'] = 'warehouses/manage';
+$route['dashboard/warehouses'] = 'warehouses/manage';
+
+/* Web UI routes for Reports */
+$route['reports/low-stock'] = 'reports/low_stock';
+$route['dashboard/reports/low-stock'] = 'reports/low_stock';
+
+/* API routes for Reports */
+$route['api/reports/low-stock'] = 'reports/low_stock_data';
+$route['api/reports/low-stock/export'] = 'reports/low_stock_export';
+
 
 $route['api/auth/login'] = 'auth/login';
 $route['api/auth/logout'] = 'auth/logout';

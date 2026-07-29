@@ -79,10 +79,18 @@ class Bill_service extends Base_service {
 				$data['warehouse_id']
 			);
 
-			if ( ! $stock || (int) $stock->quantity < $quantity)
+			// Check if stock exists and if quantity is available
+			if ( ! $stock)
 			{
 				$this->CI->db->trans_complete();
-				return $this->error('Insufficient stock for product: '.$product->name);
+				return $this->error('Product not found in warehouse: '.$product->name);
+			}
+
+			// Validate that the entered quantity is not more than available stock
+			if ((int) $stock->quantity < $quantity)
+			{
+				$this->CI->db->trans_complete();
+				return $this->error('Insufficient stock for product: '.$product->name.'. Available: '.(int)$stock->quantity.', Requested: '.$quantity);
 			}
 
 			$details[] = array(
@@ -94,15 +102,26 @@ class Bill_service extends Base_service {
 			);
 		}
 
-		$discount = isset($data['discount']) ? (float) $data['discount'] : 0;
-		$total_after_discount = max(0, $total - $discount);
+		// Validate discount is a percentage between 0 and 100
+		$discount_percent = isset($data['discount']) ? (float) $data['discount'] : 0;
+
+		// Validate discount is between 0 and 100
+		if ($discount_percent < 0 || $discount_percent > 100)
+		{
+			$this->CI->db->trans_complete();
+			return $this->error('Discount must be a percentage between 0 and 100');
+		}
+
+		// Calculate discount amount and round the result
+		$discount_amount = round(($total * $discount_percent) / 100, 2);
+		$total_after_discount = round(max(0, $total - $discount_amount), 2);
 
 		$bill_id = $this->CI->bill_model->insert(array(
 			'client_id' => (int) $data['client_id'],
 			'warehouse_id' => (int) $data['warehouse_id'],
-			'total' => $total,
-			'discount' => $discount,
-			'total_after_discount' => $total_after_discount,
+			'total' => round($total, 2),
+			'discount' => $discount_amount,
+			'total_after_discount' => $total_after_discount
 		));
 
 		foreach ($details as $detail)
@@ -126,7 +145,13 @@ class Bill_service extends Base_service {
 			return $this->error('Failed to create bill');
 		}
 
-		return $this->success($this->CI->bill_model->get_with_details($bill_id), 'Bill created');
+		// Return the bill data with a redirect URL
+		$bill_data = $this->CI->bill_model->get_with_details($bill_id);
+
+		// Add redirect URL to the response
+		$bill_data->redirect_url = '/index.php/bills/detail/'.$bill_id;
+
+		return $this->success($bill_data, 'Bill created');
 	}
 
 	public function delete($id)
@@ -157,6 +182,16 @@ class Bill_service extends Base_service {
 		if (empty($data['details']) || ! is_array($data['details']))
 		{
 			$errors['details'] = 'At least one bill detail is required';
+		}
+
+		// Validate discount is a percentage between 0 and 100
+		if (isset($data['discount']))
+		{
+			$discount = (float) $data['discount'];
+			if ($discount < 0 || $discount > 100)
+			{
+				$errors['discount'] = 'Discount must be between 0 and 100 percent';
+			}
 		}
 
 		if ( ! empty($errors))

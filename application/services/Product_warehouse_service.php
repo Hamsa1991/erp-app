@@ -178,4 +178,92 @@ class Product_warehouse_service extends Base_service {
 
 		return $this->success();
 	}
+	/**
+	 * Get low stock items with pagination
+	 */
+	public function get_low_stock_paginated($warehouse_id = NULL, $page = 1, $per_page = 10, $search = '')
+	{
+		$offset = ($page - 1) * $per_page;
+
+		$this->CI->db
+			->select('
+            products.id as product_id,
+            products.name as product_name,
+            products.code as product_code,
+            warehouses.id as warehouse_id,
+            warehouses.name as warehouse_name,
+            product_warehouse.quantity,
+            product_warehouse.alert_quantity
+        ')
+			->from('product_warehouse')
+			->join('products', 'products.id = product_warehouse.product_id')
+			->join('warehouses', 'warehouses.id = product_warehouse.warehouse_id')
+			->where('product_warehouse.quantity < product_warehouse.alert_quantity')
+			->where('products.is_available', 1);
+
+		if ($warehouse_id !== NULL && $warehouse_id !== '') {
+			$this->CI->db->where('product_warehouse.warehouse_id', (int) $warehouse_id);
+		}
+
+		if ($search !== '') {
+			$this->CI->db->group_start();
+			$this->CI->db->like('products.name', $search);
+			$this->CI->db->or_like('products.code', $search);
+			$this->CI->db->group_end();
+		}
+
+		$total = $this->CI->db->count_all_results('', FALSE);
+
+		$items = $this->CI->db
+			->order_by('products.name', 'ASC')
+			->order_by('warehouses.name', 'ASC')
+			->limit($per_page, $offset)
+			->get()
+			->result();
+
+		return array(
+			'items' => $items,
+			'total' => (int) $total,
+			'page' => $page,
+			'per_page' => $per_page,
+			'total_pages' => (int) ceil($total / $per_page),
+		);
+	}
+
+	/**
+	 * Get all low stock items for export
+	 */
+	public function get_low_stock_all($warehouse_id = NULL, $search = '')
+	{
+		$this->CI->db
+			->select('
+            products.name as product_name,
+            products.code as product_code,
+            warehouses.name as warehouse_name,
+            product_warehouse.quantity,
+            product_warehouse.alert_quantity
+        ')
+			->from('product_warehouse')
+			->join('products', 'products.id = product_warehouse.product_id')
+			->join('warehouses', 'warehouses.id = product_warehouse.warehouse_id')
+			->where('product_warehouse.quantity < product_warehouse.alert_quantity')
+			->where('products.is_available', 1);
+
+		if ($warehouse_id !== NULL && $warehouse_id !== '') {
+			$this->CI->db->where('product_warehouse.warehouse_id', (int) $warehouse_id);
+		}
+
+		if ($search !== '') {
+			$this->CI->db->group_start();
+			$this->CI->db->like('products.name', $search);
+			$this->CI->db->or_like('products.code', $search);
+			$this->CI->db->group_end();
+		}
+
+		return $this->CI->db
+			->order_by('products.name', 'ASC')
+			->order_by('warehouses.name', 'ASC')
+			->get()
+			->result();
+	}
 }

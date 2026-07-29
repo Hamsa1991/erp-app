@@ -9,6 +9,7 @@ class Warehouses extends Web_Controller {
 	{
 		parent::__construct();
 		$this->load->service('warehouse_service');
+		$this->load->service('auth_service');
 	}
 
 	private function require_api_auth()
@@ -44,6 +45,19 @@ class Warehouses extends Web_Controller {
 
 		$result = $this->warehouse_service->list_paginated($params);
 		$this->json_success($result['data']);
+	}
+
+	public function manage()
+	{
+		$this->require_auth();
+		$this->require_permission_web('manage_warehouses');
+
+		$data = array(
+			'title' => 'Manage Warehouses',
+			'page_script' => 'warehouses-manage.js',
+		);
+
+		$this->render('warehouses/manage', $data);
 	}
 
 	public function index()
@@ -89,6 +103,8 @@ class Warehouses extends Web_Controller {
 		}
 
 		$result = $this->warehouse_service->create($this->get_json_input());
+
+		// Use the parent's handle_service_result method
 		$this->handle_service_result($result, 201);
 	}
 
@@ -104,6 +120,8 @@ class Warehouses extends Web_Controller {
 		}
 
 		$result = $this->warehouse_service->update($id, $this->get_json_input());
+
+		// Use the parent's handle_service_result method
 		$this->handle_service_result($result);
 	}
 

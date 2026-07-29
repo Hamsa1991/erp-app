@@ -14,7 +14,13 @@
 			<nav>
 				<a href="<?php echo site_url('dashboard/products'); ?>" class="<?php echo (isset($title) && $title === 'Manage Products') ? 'active' : ''; ?>">Products</a>
 				<?php if ($current_user && in_array('manage_bills', $current_user->permissions, TRUE)): ?>
-				<a href="<?php echo site_url('dashboard/bills/create'); ?>" class="<?php echo (isset($title) && $title === 'Create Bill') ? 'active' : ''; ?>">Create Bill</a>
+					<a href="<?php echo site_url('dashboard/bills/create'); ?>" class="<?php echo (isset($title) && $title === 'Create Bill') ? 'active' : ''; ?>">Create Bill</a>
+				<?php endif; ?>
+				<?php if ($current_user && in_array('manage_warehouses', $current_user->permissions, TRUE)): ?>
+					<a href="<?php echo site_url('dashboard/warehouses'); ?>" class="<?php echo (isset($title) && $title === 'Manage Warehouses') ? 'active' : ''; ?>">Warehouses</a>
+				<?php endif; ?>
+				<?php if ($current_user && in_array('view_reports', $current_user->permissions, TRUE)): ?>
+					<a href="<?php echo site_url('dashboard/reports/low-stock'); ?>" class="<?php echo (isset($title) && $title === 'Low Stock Report') ? 'active' : ''; ?>">Low Stock Report</a>
 				<?php endif; ?>
 				<a href="<?php echo site_url('products'); ?>">View Catalog</a>
 				<a href="<?php echo site_url('bills'); ?>">View Bills</a>

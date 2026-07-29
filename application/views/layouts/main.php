@@ -16,6 +16,8 @@
 			<nav class="main-nav">
 				<a href="<?php echo site_url('products'); ?>">Products</a>
 				<a href="<?php echo site_url('warehouses'); ?>">Warehouses</a>
+<!--				<a href="--><?php //echo site_url('warehouses/manage'); ?><!--">Manage Warehouses</a>-->
+				<a href="<?php echo site_url('clients'); ?>">Clients</a>
 				<a href="<?php echo site_url('bills'); ?>">Bills</a>
 				<?php if ($current_user && in_array('manage_products', $current_user->permissions, TRUE)): ?>
 				<a href="<?php echo site_url('dashboard/products'); ?>">Dashboard</a>

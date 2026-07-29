@@ -11,13 +11,20 @@ class Base_service {
 		$this->CI->load->database();
 	}
 
-	protected function success($data = NULL, $message = 'Success')
+	protected function success($data = NULL, $message = 'Success', $pagination = NULL)
 	{
-		return array(
+		$result = array(
 			'success' => TRUE,
 			'message' => $message,
-			'data' => $data,
+			'data' => $data
 		);
+
+		if ($pagination !== NULL)
+		{
+			$result['pagination'] = $pagination;
+		}
+
+		return $result;
 	}
 
 	protected function error($message, $errors = NULL)

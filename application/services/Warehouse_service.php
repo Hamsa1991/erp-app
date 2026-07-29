@@ -53,9 +53,11 @@ class Warehouse_service extends Base_service {
 
 	public function create(array $data)
 	{
-		if (empty($data['name']))
+		$validation = $this->validate($data);
+
+		if ( ! $validation['success'])
 		{
-			return $this->error('Validation failed', array('name' => 'Name is required'));
+			return $validation;
 		}
 
 		$id = $this->CI->warehouse_model->insert(array(
@@ -97,6 +99,13 @@ class Warehouse_service extends Base_service {
 			return $this->error('Warehouse not found');
 		}
 
+		// Check if warehouse has products
+		$products = $this->CI->warehouse_model->get_products($id);
+		if ( ! empty($products))
+		{
+			return $this->error('Cannot delete warehouse with existing products');
+		}
+
 		$this->CI->warehouse_model->delete($id);
 		return $this->success(NULL, 'Warehouse deleted');
 	}
@@ -119,6 +128,23 @@ class Warehouse_service extends Base_service {
 		}
 
 		return ! empty($user->warehouse_id) ? (int) $user->warehouse_id : FALSE;
+	}
+
+	private function validate(array $data)
+	{
+		$errors = array();
+
+		if (empty($data['name']))
+		{
+			$errors['name'] = 'Name is required';
+		}
+
+		if ( ! empty($errors))
+		{
+			return $this->error('Validation failed', $errors);
+		}
+
+		return $this->success();
 	}
 
 	private function is_admin_user($user)

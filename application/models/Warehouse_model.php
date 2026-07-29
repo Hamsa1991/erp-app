@@ -7,8 +7,18 @@ class Warehouse_model extends MY_Model {
 
 	protected $table = 'warehouses';
 
-	public function get_all($conditions = [], $order_by = null) 
+	public function get_all($conditions = [], $order_by = null)
 	{
+		if ( ! empty($conditions))
+		{
+			$this->db->where($conditions);
+		}
+
+		if ($order_by !== null)
+		{
+			$this->db->order_by($order_by);
+		}
+
 		return $this->db->get($this->table)->result();
 	}
 
@@ -53,6 +63,7 @@ class Warehouse_model extends MY_Model {
 		if ($search !== '')
 		{
 			$this->db->like('name', $search);
+			$this->db->or_like('address', $search);
 		}
 
 		$total = $this->db->count_all_results('', FALSE);

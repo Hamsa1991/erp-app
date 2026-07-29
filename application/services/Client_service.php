@@ -21,6 +21,30 @@ class Client_service extends Base_service {
 		return $this->success($this->CI->client_model->get_all(array(), 'last_name ASC'));
 	}
 
+	public function list_all_paginated($search = NULL, $page = 1, $per_page = 10)
+	{
+		$offset = ($page - 1) * $per_page;
+
+		// Get total count
+		$total = $this->CI->client_model->count_all($search);
+
+		// Get paginated results
+		if ($search) {
+			$clients = $this->CI->client_model->search_paginated($search, $per_page, $offset);
+		} else {
+			$clients = $this->CI->client_model->get_all_paginated(array(), 'last_name ASC', $per_page, $offset);
+		}
+
+		$pagination = array(
+			'total' => (int) $total,
+			'per_page' => (int) $per_page,
+			'current_page' => (int) $page,
+			'total_pages' => (int) ceil($total / $per_page)
+		);
+
+		return $this->success($clients, 'Success', $pagination);
+	}
+
 	public function get($id)
 	{
 		$client = $this->CI->client_model->get_by_id($id);

@@ -11,12 +11,13 @@ class MY_Controller extends CI_Controller {
 			->set_output(json_encode($data, JSON_UNESCAPED_UNICODE));
 	}
 
-	protected function json_success($data = NULL, $message = 'Success', $status_code = 200)
+	protected function json_success($data = NULL, $message = 'Success', $status_code = 200, $pagination = NULL)
 	{
 		$this->json_response(array(
 			'success' => TRUE,
 			'message' => $message,
 			'data' => $data,
+			'pagination' => $pagination
 		), $status_code);
 	}
 
