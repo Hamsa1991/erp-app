@@ -12,6 +12,18 @@ class User_model extends MY_Model {
 		return $this->get_one_where(array('email' => $email));
 	}
 
+	public function get_warehouse($user_id)
+	{
+		$user = $this->get_by_id($user_id);
+
+		if ( ! $user || ! $user->warehouse_id)
+		{
+			return NULL;
+		}
+
+		return $this->db->get_where('warehouses', array('id' => $user->warehouse_id))->row();
+	}
+
 	public function get_with_roles($id)
 	{
 		$user = $this->get_by_id($id);
@@ -21,15 +33,20 @@ class User_model extends MY_Model {
 			return NULL;
 		}
 
-		$user->roles = $this->db
+		$user->roles = $this->get_roles($id);
+
+		return $user;
+	}
+
+	public function get_roles($user_id)
+	{
+		return $this->db
 			->select('roles.*')
 			->from('user_roles')
 			->join('roles', 'roles.id = user_roles.role_id')
-			->where('user_roles.user_id', $id)
+			->where('user_roles.user_id', $user_id)
 			->get()
 			->result();
-
-		return $user;
 	}
 
 	public function assign_role($user_id, $role_id)

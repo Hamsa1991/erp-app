@@ -53,6 +53,21 @@ $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+/* Web UI routes */
+$route['login'] = 'auth/login_page';$route['login/submit'] = 'auth/login'; 
+$route['logout'] = 'auth/logout_page';
+$route['products'] = 'products/browse';
+$route['products/data'] = 'products/browse_data';
+$route['products/manage/data'] = 'products/manage_data';
+$route['products/toggle/(:num)'] = 'products/toggle/$1';
+$route['dashboard/products'] = 'products/manage';
+$route['warehouses'] = 'warehouses/browse';
+$route['warehouses/data'] = 'warehouses/browse_data';
+$route['bills'] = 'bills/browse';
+$route['bills/data'] = 'bills/browse_data';
+$route['bills/detail/(:num)'] = 'bills/detail/$1';
+$route['dashboard/bills/create'] = 'bills/create_form';
+
 $route['api/auth/login'] = 'auth/login';
 $route['api/auth/logout'] = 'auth/logout';
 $route['api/auth/me'] = 'auth/me';
@@ -64,6 +79,7 @@ $route['api/products/update/(:num)'] = 'products/update/$1';
 $route['api/products/delete/(:num)'] = 'products/delete/$1';
 
 $route['api/warehouses'] = 'warehouses/index';
+$route['api/warehouses/accessible'] = 'warehouses/accessible';
 $route['api/warehouses/create'] = 'warehouses/create';
 $route['api/warehouses/(:num)'] = 'warehouses/show/$1';
 $route['api/warehouses/update/(:num)'] = 'warehouses/update/$1';
@@ -72,6 +88,7 @@ $route['api/warehouses/delete/(:num)'] = 'warehouses/delete/$1';
 $route['api/inventory'] = 'product_warehouse/index';
 $route['api/inventory/low-stock'] = 'product_warehouse/low_stock';
 $route['api/inventory/create'] = 'product_warehouse/create';
+$route['api/inventory/upsert'] = 'product_warehouse/upsert';
 $route['api/inventory/(:num)'] = 'product_warehouse/show/$1';
 $route['api/inventory/update/(:num)'] = 'product_warehouse/update/$1';
 

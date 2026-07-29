@@ -10,7 +10,10 @@ class Product_warehouse extends MY_Controller {
 		parent::__construct();
 		$this->load->service('product_warehouse_service');
 		$this->load->service('auth_service');
+	}
 
+	private function require_api_auth()
+	{
 		if ( ! $this->auth_service->current_user())
 		{
 			$this->json_error('Unauthorized', 401);
@@ -20,22 +23,32 @@ class Product_warehouse extends MY_Controller {
 
 	public function index()
 	{
+		$this->require_api_auth();
 		$this->require_permission('manage_inventory');
+
+		$user = $this->auth_service->current_user();
 		$warehouse_id = $this->input->get('warehouse_id');
-		$result = $this->product_warehouse_service->list_all($warehouse_id ?: NULL);
+		$result = $this->product_warehouse_service->list_for_user($user, $warehouse_id ?: NULL);
 		$this->json_success($result['data']);
 	}
 
 	public function low_stock()
 	{
+		$this->require_api_auth();
 		$this->require_permission('manage_inventory');
-		$warehouse_id = $this->input->get('warehouse_id');
-		$result = $this->product_warehouse_service->low_stock($warehouse_id ?: NULL);
+
+		$user = $this->auth_service->current_user();
+		$this->load->service('warehouse_service');
+		$scope = $this->warehouse_service->get_user_warehouse_scope($user);
+		$warehouse_id = $scope !== NULL ? $scope : ($this->input->get('warehouse_id') ?: NULL);
+
+		$result = $this->product_warehouse_service->low_stock($warehouse_id);
 		$this->json_success($result['data']);
 	}
 
 	public function show($id)
 	{
+		$this->require_api_auth();
 		$this->require_permission('manage_inventory');
 		$result = $this->product_warehouse_service->get($id);
 
@@ -50,6 +63,7 @@ class Product_warehouse extends MY_Controller {
 
 	public function create()
 	{
+		$this->require_api_auth();
 		$this->require_permission('manage_inventory');
 
 		if ($this->input->method() !== 'post')
@@ -58,7 +72,8 @@ class Product_warehouse extends MY_Controller {
 			return;
 		}
 
-		$result = $this->product_warehouse_service->create($this->get_json_input());
+		$user = $this->auth_service->current_user();
+		$result = $this->product_warehouse_service->create($this->get_json_input(), $user);
 
 		if ( ! $result['success'])
 		{
@@ -69,8 +84,32 @@ class Product_warehouse extends MY_Controller {
 		$this->json_success($result['data'], $result['message'], 201);
 	}
 
+	public function upsert()
+	{
+		$this->require_api_auth();
+		$this->require_permission('manage_inventory');
+
+		if ($this->input->method() !== 'post')
+		{
+			$this->json_error('Method not allowed', 405);
+			return;
+		}
+
+		$user = $this->auth_service->current_user();
+		$result = $this->product_warehouse_service->upsert($this->get_json_input(), $user);
+
+		if ( ! $result['success'])
+		{
+			$this->json_error($result['message'], 422, isset($result['errors']) ? $result['errors'] : NULL);
+			return;
+		}
+
+		$this->json_success($result['data'], $result['message']);
+	}
+
 	public function update($id)
 	{
+		$this->require_api_auth();
 		$this->require_permission('manage_inventory');
 
 		if ( ! in_array($this->input->method(), array('put', 'patch', 'post'), TRUE))
@@ -79,7 +118,8 @@ class Product_warehouse extends MY_Controller {
 			return;
 		}
 
-		$result = $this->product_warehouse_service->update($id, $this->get_json_input());
+		$user = $this->auth_service->current_user();
+		$result = $this->product_warehouse_service->update($id, $this->get_json_input(), $user);
 
 		if ( ! $result['success'])
 		{

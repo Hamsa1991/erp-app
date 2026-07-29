@@ -66,6 +66,35 @@ class MY_Model extends CI_Model {
 		return $this->db->count_all_results($this->table);
 	}
 
+	public function paginate($conditions = array(), $order_by = NULL, $page = 1, $per_page = 10)
+	{
+		$page = max(1, (int) $page);
+		$per_page = max(1, (int) $per_page);
+		$offset = ($page - 1) * $per_page;
+
+		if ( ! empty($conditions))
+		{
+			$this->db->where($conditions);
+		}
+
+		$total = $this->db->count_all_results($this->table, FALSE);
+
+		if ($order_by !== NULL)
+		{
+			$this->db->order_by($order_by);
+		}
+
+		$items = $this->db->limit($per_page, $offset)->get()->result();
+
+		return array(
+			'items' => $items,
+			'total' => (int) $total,
+			'page' => $page,
+			'per_page' => $per_page,
+			'total_pages' => (int) ceil($total / $per_page),
+		);
+	}
+
 	protected function _stamp_timestamps($data, $is_insert)
 	{
 		$now = date('Y-m-d H:i:s');

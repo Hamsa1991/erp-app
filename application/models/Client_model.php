@@ -7,6 +7,15 @@ class Client_model extends MY_Model {
 
 	protected $table = 'clients';
 
+	public function get_bills($client_id)
+	{
+		return $this->db
+			->where('client_id', $client_id)
+			->order_by('id', 'DESC')
+			->get('bills')
+			->result();
+	}
+
 	public function search($term)
 	{
 		$this->db->group_start();

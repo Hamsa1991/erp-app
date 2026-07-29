@@ -22,4 +22,15 @@ class Role_model extends MY_Model {
 			->get()
 			->result();
 	}
+
+	public function get_users($role_id)
+	{
+		return $this->db
+			->select('users.*')
+			->from('user_roles')
+			->join('users', 'users.id = user_roles.user_id')
+			->where('user_roles.role_id', $role_id)
+			->get()
+			->result();
+	}
 }

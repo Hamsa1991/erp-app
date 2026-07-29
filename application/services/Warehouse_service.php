@@ -16,6 +16,29 @@ class Warehouse_service extends Base_service {
 		return $this->success($this->CI->warehouse_model->get_all(array(), 'name ASC'));
 	}
 
+	public function list_paginated(array $params = array())
+	{
+		$result = $this->CI->warehouse_model->get_paginated($params);
+		return $this->success($result);
+	}
+
+	public function list_accessible($user)
+	{
+		if ($this->is_admin_user($user))
+		{
+			return $this->list_all();
+		}
+
+		if (empty($user->warehouse_id))
+		{
+			return $this->success(array());
+		}
+
+		$warehouse = $this->CI->warehouse_model->get_by_id($user->warehouse_id);
+
+		return $this->success($warehouse ? array($warehouse) : array());
+	}
+
 	public function get($id)
 	{
 		$warehouse = $this->CI->warehouse_model->get_by_id($id);
@@ -76,5 +99,43 @@ class Warehouse_service extends Base_service {
 
 		$this->CI->warehouse_model->delete($id);
 		return $this->success(NULL, 'Warehouse deleted');
+	}
+
+	public function user_can_access($user, $warehouse_id)
+	{
+		if ($this->is_admin_user($user))
+		{
+			return TRUE;
+		}
+
+		return ! empty($user->warehouse_id) && (int) $user->warehouse_id === (int) $warehouse_id;
+	}
+
+	public function get_user_warehouse_scope($user)
+	{
+		if ($this->is_admin_user($user))
+		{
+			return NULL;
+		}
+
+		return ! empty($user->warehouse_id) ? (int) $user->warehouse_id : FALSE;
+	}
+
+	private function is_admin_user($user)
+	{
+		if (empty($user->roles))
+		{
+			return FALSE;
+		}
+
+		foreach ($user->roles as $role)
+		{
+			if ($role->name === 'admin')
+			{
+				return TRUE;
+			}
+		}
+
+		return FALSE;
 	}
 }

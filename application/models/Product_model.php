@@ -16,4 +16,116 @@ class Product_model extends MY_Model {
 	{
 		return $this->get_one_where(array('code' => $code));
 	}
+
+	public function get_product_warehouses($product_id)
+	{
+		return $this->db
+			->select('product_warehouse.*, warehouses.name AS warehouse_name')
+			->from('product_warehouse')
+			->join('warehouses', 'warehouses.id = product_warehouse.warehouse_id')
+			->where('product_warehouse.product_id', $product_id)
+			->get()
+			->result();
+	}
+
+	public function get_warehouses($product_id)
+	{
+		return $this->db
+			->select('warehouses.*')
+			->from('warehouses')
+			->join('product_warehouse', 'product_warehouse.warehouse_id = warehouses.id')
+			->where('product_warehouse.product_id', $product_id)
+			->get()
+			->result();
+	}
+
+	public function get_bill_details($product_id)
+	{
+		return $this->db->get_where('bill_details', array('product_id' => $product_id))->result();
+	}
+
+	public function get_paginated_with_inventory(array $params = array())
+	{
+		$page = max(1, (int) (isset($params['page']) ? $params['page'] : 1));
+		$per_page = max(1, (int) (isset($params['per_page']) ? $params['per_page'] : 10));
+		$search = isset($params['search']) ? trim($params['search']) : '';
+		$warehouse_id = isset($params['warehouse_id']) ? $params['warehouse_id'] : NULL;
+		$only_available = ! empty($params['only_available']);
+
+		$this->db
+			->select('products.id, products.name, products.code, products.price, products.is_available, product_warehouse.quantity, product_warehouse.alert_quantity, warehouses.id AS warehouse_id, warehouses.name AS warehouse_name')
+			->from('products')
+			->join('product_warehouse', 'product_warehouse.product_id = products.id')
+			->join('warehouses', 'warehouses.id = product_warehouse.warehouse_id');
+
+		if ($only_available)
+		{
+			$this->db->where('products.is_available', 1);
+		}
+
+		if ($warehouse_id !== NULL && $warehouse_id !== '')
+		{
+			$this->db->where('product_warehouse.warehouse_id', (int) $warehouse_id);
+		}
+
+		if ($search !== '')
+		{
+			$this->db->group_start();
+			$this->db->like('products.name', $search);
+			$this->db->or_like('products.code', $search);
+			$this->db->group_end();
+		}
+
+		$total = $this->db->count_all_results('', FALSE);
+
+		$offset = ($page - 1) * $per_page;
+		$items = $this->db
+			->order_by('products.name', 'ASC')
+			->order_by('warehouses.name', 'ASC')
+			->limit($per_page, $offset)
+			->get()
+			->result();
+
+		return array(
+			'items' => $items,
+			'total' => (int) $total,
+			'page' => $page,
+			'per_page' => $per_page,
+			'total_pages' => (int) ceil($total / $per_page),
+		);
+	}
+
+	public function get_paginated_for_manage(array $params = array())
+	{
+		$page = max(1, (int) (isset($params['page']) ? $params['page'] : 1));
+		$per_page = max(1, (int) (isset($params['per_page']) ? $params['per_page'] : 10));
+		$search = isset($params['search']) ? trim($params['search']) : '';
+
+		$this->db->from($this->table);
+
+		if ($search !== '')
+		{
+			$this->db->group_start();
+			$this->db->like('name', $search);
+			$this->db->or_like('code', $search);
+			$this->db->group_end();
+		}
+
+		$total = $this->db->count_all_results('', FALSE);
+		$offset = ($page - 1) * $per_page;
+
+		$items = $this->db
+			->order_by('name', 'ASC')
+			->limit($per_page, $offset)
+			->get()
+			->result();
+
+		return array(
+			'items' => $items,
+			'total' => (int) $total,
+			'page' => $page,
+			'per_page' => $per_page,
+			'total_pages' => (int) ceil($total / $per_page),
+		);
+	}
 }

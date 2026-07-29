@@ -1,0 +1,91 @@
+/* Dashboard Layout */
+
+.dashboard-body { background: #eef1f6; }
+
+.dashboard-layout {
+	display: flex;
+	min-height: 100vh;
+}
+
+.dashboard-sidebar {
+	width: 240px;
+	background: #1a1a2e;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	padding: 1.5rem 0;
+	flex-shrink: 0;
+}
+
+.dashboard-sidebar .brand {
+	display: block;
+	padding: 0 1.25rem 1.5rem;
+	color: #fff;
+	font-weight: 700;
+	text-decoration: none;
+	font-size: 1.1rem;
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+	margin-bottom: 1rem;
+}
+
+.dashboard-sidebar nav {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.dashboard-sidebar nav a {
+	color: #c8d0e0;
+	text-decoration: none;
+	padding: 0.65rem 1.25rem;
+	font-size: 0.95rem;
+	transition: background 0.15s;
+}
+
+.dashboard-sidebar nav a:hover,
+.dashboard-sidebar nav a.active {
+	background: rgba(255,255,255,0.08);
+	color: #fff;
+}
+
+.sidebar-footer {
+	padding: 1rem 1.25rem;
+	border-top: 1px solid rgba(255,255,255,0.1);
+	font-size: 0.85rem;
+}
+
+.sidebar-footer a {
+	color: #c8d0e0;
+	text-decoration: none;
+	display: block;
+	margin-top: 0.35rem;
+}
+
+.dashboard-main {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.dashboard-header {
+	background: #fff;
+	padding: 1.25rem 2rem;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-header h1 {
+	margin: 0;
+	font-size: 1.35rem;
+}
+
+.dashboard-content {
+	padding: 1.5rem 2rem 2rem;
+	overflow-y: auto;
+	flex: 1;
+}
+
+@media (max-width: 768px) {
+	.dashboard-layout { flex-direction: column; }
+	.dashboard-sidebar { width: 100%; }
+}

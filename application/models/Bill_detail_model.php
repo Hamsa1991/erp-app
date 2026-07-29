@@ -7,6 +7,30 @@ class Bill_detail_model extends MY_Model {
 
 	protected $table = 'bill_details';
 
+	public function get_bill($detail_id)
+	{
+		$detail = $this->get_by_id($detail_id);
+
+		if ( ! $detail)
+		{
+			return NULL;
+		}
+
+		return $this->db->get_where('bills', array('id' => $detail->bill_id))->row();
+	}
+
+	public function get_product($detail_id)
+	{
+		$detail = $this->get_by_id($detail_id);
+
+		if ( ! $detail)
+		{
+			return NULL;
+		}
+
+		return $this->db->get_where('products', array('id' => $detail->product_id))->row();
+	}
+
 	public function get_by_bill($bill_id)
 	{
 		return $this->get_where(array('bill_id' => $bill_id));

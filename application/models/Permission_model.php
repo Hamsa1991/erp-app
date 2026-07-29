@@ -12,6 +12,17 @@ class Permission_model extends MY_Model {
 		return $this->get_one_where(array('slug' => $slug));
 	}
 
+	public function get_roles($permission_id)
+	{
+		return $this->db
+			->select('roles.*')
+			->from('role_permissions')
+			->join('roles', 'roles.id = role_permissions.role_id')
+			->where('role_permissions.permission_id', $permission_id)
+			->get()
+			->result();
+	}
+
 	public function get_for_user($user_id)
 	{
 		return $this->db

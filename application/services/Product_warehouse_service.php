@@ -11,6 +11,7 @@ class Product_warehouse_service extends Base_service {
 		$this->CI->load->model('product_warehouse_model');
 		$this->CI->load->model('product_model');
 		$this->CI->load->model('warehouse_model');
+		$this->CI->load->service('warehouse_service');
 	}
 
 	public function list_all($warehouse_id = NULL)
@@ -21,6 +22,23 @@ class Product_warehouse_service extends Base_service {
 		}
 
 		return $this->success($this->CI->product_warehouse_model->get_all());
+	}
+
+	public function list_for_user($user, $warehouse_id = NULL)
+	{
+		$scope = $this->CI->warehouse_service->get_user_warehouse_scope($user);
+
+		if ($scope === FALSE)
+		{
+			return $this->success(array());
+		}
+
+		if ($scope !== NULL)
+		{
+			return $this->list_all($scope);
+		}
+
+		return $this->list_all($warehouse_id);
 	}
 
 	public function get($id)
@@ -35,8 +53,13 @@ class Product_warehouse_service extends Base_service {
 		return $this->success($row);
 	}
 
-	public function create(array $data)
+	public function create(array $data, $user = NULL)
 	{
+		if ($user !== NULL && ! $this->CI->warehouse_service->user_can_access($user, $data['warehouse_id']))
+		{
+			return $this->error('You do not have access to this warehouse');
+		}
+
 		$validation = $this->validate($data);
 
 		if ( ! $validation['success'])
@@ -59,13 +82,18 @@ class Product_warehouse_service extends Base_service {
 		return $this->success($this->CI->product_warehouse_model->get_by_id($id), 'Inventory record created');
 	}
 
-	public function update($id, array $data)
+	public function update($id, array $data, $user = NULL)
 	{
 		$row = $this->CI->product_warehouse_model->get_by_id($id);
 
 		if ( ! $row)
 		{
 			return $this->error('Inventory record not found');
+		}
+
+		if ($user !== NULL && ! $this->CI->warehouse_service->user_can_access($user, $row->warehouse_id))
+		{
+			return $this->error('You do not have access to this warehouse');
 		}
 
 		$payload = array();
@@ -81,6 +109,26 @@ class Product_warehouse_service extends Base_service {
 		$this->CI->product_warehouse_model->update($id, $payload);
 
 		return $this->success($this->CI->product_warehouse_model->get_by_id($id), 'Inventory record updated');
+	}
+
+	public function upsert(array $data, $user = NULL)
+	{
+		if ($user !== NULL && ! $this->CI->warehouse_service->user_can_access($user, $data['warehouse_id']))
+		{
+			return $this->error('You do not have access to this warehouse');
+		}
+
+		$existing = $this->CI->product_warehouse_model->get_by_product_and_warehouse(
+			$data['product_id'],
+			$data['warehouse_id']
+		);
+
+		if ($existing)
+		{
+			return $this->update($existing->id, $data, $user);
+		}
+
+		return $this->create($data, $user);
 	}
 
 	public function adjust_quantity($product_id, $warehouse_id, $quantity_delta)

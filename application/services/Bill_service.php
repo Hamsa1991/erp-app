@@ -14,11 +14,23 @@ class Bill_service extends Base_service {
 		$this->CI->load->model('warehouse_model');
 		$this->CI->load->model('product_model');
 		$this->CI->load->model('product_warehouse_model');
+		$this->CI->load->service('warehouse_service');
 	}
 
-	public function list_all()
+	public function list_all($warehouse_id = NULL)
 	{
+		if ($warehouse_id !== NULL)
+		{
+			return $this->list_paginated(array('warehouse_id' => $warehouse_id, 'per_page' => 1000));
+		}
+
 		return $this->success($this->CI->bill_model->get_all_with_relations());
+	}
+
+	public function list_paginated(array $params = array())
+	{
+		$result = $this->CI->bill_model->get_paginated($params);
+		return $this->success($result);
 	}
 
 	public function get($id)

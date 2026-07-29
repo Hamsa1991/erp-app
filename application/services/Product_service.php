@@ -9,11 +9,24 @@ class Product_service extends Base_service {
 	{
 		parent::__construct();
 		$this->CI->load->model('product_model');
+		$this->CI->load->model('product_warehouse_model');
 	}
 
 	public function list_all()
 	{
 		return $this->success($this->CI->product_model->get_all(array(), 'name ASC'));
+	}
+
+	public function list_paginated_with_inventory(array $params = array())
+	{
+		$result = $this->CI->product_model->get_paginated_with_inventory($params);
+		return $this->success($result);
+	}
+
+	public function list_paginated_for_manage(array $params = array())
+	{
+		$result = $this->CI->product_model->get_paginated_for_manage($params);
+		return $this->success($result);
 	}
 
 	public function get($id)
@@ -24,6 +37,20 @@ class Product_service extends Base_service {
 		{
 			return $this->error('Product not found');
 		}
+
+		return $this->success($product);
+	}
+
+	public function get_with_inventory($id, $warehouse_id = NULL)
+	{
+		$product = $this->CI->product_model->get_by_id($id);
+
+		if ( ! $product)
+		{
+			return $this->error('Product not found');
+		}
+
+		$product->inventory = $this->CI->product_warehouse_model->get_by_product($id, $warehouse_id);
 
 		return $this->success($product);
 	}
@@ -91,6 +118,24 @@ class Product_service extends Base_service {
 		$this->CI->product_model->update($id, $payload);
 
 		return $this->success($this->CI->product_model->get_by_id($id), 'Product updated');
+	}
+
+	public function toggle_availability($id)
+	{
+		$product = $this->CI->product_model->get_by_id($id);
+
+		if ( ! $product)
+		{
+			return $this->error('Product not found');
+		}
+
+		$new_status = (int) ! (bool) $product->is_available;
+		$this->CI->product_model->update($id, array('is_available' => $new_status));
+
+		return $this->success(
+			$this->CI->product_model->get_by_id($id),
+			$new_status ? 'Product enabled' : 'Product disabled'
+		);
 	}
 
 	public function delete($id)
