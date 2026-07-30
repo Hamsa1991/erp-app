@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 30, 2026 at 04:05 PM
+-- Generation Time: Jul 30, 2026 at 06:41 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -173,7 +173,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `code`, `price`, `is_available`, `created_at`, `updated_at`) VALUES
-(1, 'product 1', 'pro1', 120.00, 0, '2026-07-28 21:04:58', '2026-07-28 21:05:32'),
+(1, 'product 1', 'pro1', 120.00, 0, '2026-07-28 21:04:58', '2026-07-30 18:27:46'),
 (2, 'product 2', 'pro2', 100.00, 1, '2026-07-28 21:17:13', '2026-07-28 21:17:13'),
 (3, 'product 3', 'pro3', 150.00, 1, '2026-07-28 21:17:47', '2026-07-28 21:17:47'),
 (4, 'product 4', 'pro4', 190.00, 1, '2026-07-29 12:22:54', '2026-07-29 12:23:04');
@@ -202,7 +202,8 @@ INSERT INTO `product_warehouse` (`id`, `product_id`, `warehouse_id`, `quantity`,
 (1, 2, 1, 1, 2, '2026-07-28 21:17:13', '2026-07-28 21:56:05'),
 (2, 3, 1, 0, 4, '2026-07-28 21:17:47', '2026-07-28 21:17:47'),
 (3, 4, 1, 2, 10, '2026-07-29 12:22:54', '2026-07-29 16:54:27'),
-(4, 4, 2, 26, 4, '2026-07-29 12:22:54', '2026-07-29 21:17:03');
+(4, 4, 2, 26, 4, '2026-07-29 12:22:54', '2026-07-29 21:17:03'),
+(5, 1, 2, 2, 1, '2026-07-30 18:27:46', '2026-07-30 18:27:46');
 
 -- --------------------------------------------------------
 
@@ -257,6 +258,7 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`) VALUES
 (2, 3),
 (2, 4),
 (2, 5),
+(2, 6),
 (2, 7),
 (2, 8),
 (2, 9),
@@ -452,7 +454,7 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `product_warehouse`
 --
 ALTER TABLE `product_warehouse`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `roles`

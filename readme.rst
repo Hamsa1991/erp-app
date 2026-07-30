@@ -90,8 +90,8 @@ Or download the ZIP file from GitHub and extract it to your local server directo
 
 	http://localhost/your-repository-name/
 
-7. **Default users for login:**
+7. **Default user credentials for login:**
 
-- Default admin: admin@erp.local / admin123
+- Default admin:email admin@erp.local / admin123
 
 - Default warehouse_user (related to warehouse with id 1): warehouse_user@erp.local / admin123
