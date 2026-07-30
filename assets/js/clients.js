@@ -34,10 +34,6 @@
 						'<td>' + $('<span>').text(client.last_name).html() + '</td>' +
 						'<td>' + $('<span>').text(client.email || '-').html() + '</td>' +
 						'<td>' + $('<span>').text(client.phone || '-').html() + '</td>' +
-						'<td class="action-buttons">' +
-						'<button type="button" class="btn btn-sm btn-outline edit-btn">Edit</button> ' +
-						'<button type="button" class="btn btn-sm btn-outline delete-btn">Delete</button>' +
-						'</td>' +
 						'</tr>'
 					);
 				});
