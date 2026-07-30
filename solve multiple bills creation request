@@ -1,0 +1,5 @@
+My approach to resolve the multiple bills creation request for the same latest amount of products in the same time is to use queues,
+there are many ways to solve this issue, but I see processing each bill sequentially in in queue by using jobs and queues would solve this issue effectively.
+I would create a job and add it to the queue for each create bill request, also using Redis with queues at this stage would make the process faster and more efficient.
+This will insure Process one bill at a time with full locking.
+

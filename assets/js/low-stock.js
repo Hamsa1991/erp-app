@@ -10,7 +10,7 @@
 		var $body = $('#low-stock-body');
 		$body.html('<tr><td colspan="7" class="loading">Loading...</td></tr>');
 
-		$.getJSON(App.apiUrl('reports/low-stock'), {
+		$.getJSON(App.apiUrl('api/reports/low-stock'), {
 			page: currentPage,
 			per_page: 10,
 			search: searchTerm
@@ -57,7 +57,7 @@
 		$message.hide();
 
 		$.ajax({
-			url: App.apiUrl('reports/low-stock/export'),
+			url: App.apiUrl('api/reports/low-stock/export'),
 			method: 'GET',
 			dataType: 'json',
 			data: {

@@ -241,7 +241,7 @@
 			} else {
 				// Fallback to the old way
 				setTimeout(function () {
-					window.location.href = '/index.php/bills/detail/' + response.data.id;
+					window.location.href = '../index.php/bills/detail/' + response.data.id;
 				}, 1000);
 			}
 		}).fail(function (xhr) {

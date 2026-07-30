@@ -42,30 +42,56 @@ Installation
 Please see the `installation section <https://codeigniter.com/userguide3/installation/index.html>`_
 of the CodeIgniter User Guide.
 
-*******
-License
-*******
+*************************
+How to Run This Project
+*************************
 
-Please see the `license
-agreement <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/license.rst>`_.
+Follow these steps to download and run this CodeIgniter 3 project from GitHub:
 
-*********
-Resources
-*********
+1. **Clone or Download the Repository**
+https://github.com/Hamsa1991/erp-app.git
 
--  `User Guide <https://codeigniter.com/docs>`_
--  `Contributing Guide <https://github.com/bcit-ci/CodeIgniter/blob/develop/contributing.md>`_
--  `Language File Translations <https://github.com/bcit-ci/codeigniter3-translations>`_
--  `Community Forums <http://forum.codeigniter.com/>`_
--  `Community Wiki <https://github.com/bcit-ci/CodeIgniter/wiki>`_
--  `Community Slack Channel <https://codeigniterchat.slack.com>`_
+Or download the ZIP file from GitHub and extract it to your local server directory.
 
-Report security issues to our `Security Panel <mailto:security@codeigniter.com>`_
-or via our `page on HackerOne <https://hackerone.com/codeigniter>`_, thank you.
+2. **Navigate to the Project Directory**
 
-***************
-Acknowledgement
-***************
+3. **Configure the Database**
+- Open the `application/config/database.php` file
+- Update the database connection settings with your local credentials:
 
-The CodeIgniter team would like to thank EllisLab, all the
-contributors to the CodeIgniter project and you, the CodeIgniter user.
+```php
+'hostname' => 'localhost',
+'username' => 'your_database_username',
+'password' => 'your_database_password',
+'database' => 'your_database_name',
+```
+
+4. **Import the SQL Database**
+
+- Create a new database in your MySQL server (e.g., using phpMyAdmin or MySQL command line)
+
+- The SQL file is located in the repository (check the root directory for the erp_db.sql file)
+
+5. **Configure Base URL**
+
+- Open application/config/config.php
+
+- Update the $config['base_url'] parameter:
+```php
+$config['base_url'] = 'http://localhost/your-repository-name/';
+```
+6. **Run the Application**
+- By default the working running commnad is:
+```
+	php -S localhost:3000
+```
+- Access your application via web browser:
+
+```
+http://localhost/your-repository-name/
+```
+7. **Default users for login:**
+
+- Default admin: admin@erp.local / admin123
+
+- Default warehouse_user (related to warehouse with id 1): warehouse_user@erp.local / admin123

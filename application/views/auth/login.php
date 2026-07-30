@@ -15,11 +15,11 @@
 		<form method="post" action="<?php echo site_url('login/submit'); ?>">
 			<div class="form-group">
 				<label for="email">Email</label>
-				<input type="email" id="email" name="email" required autofocus>
+				<input type="email" id="email" class="form-control" name="email" required autofocus>
 			</div>
 			<div class="form-group">
 				<label for="password">Password</label>
-				<input type="password" id="password" name="password" required>
+				<input type="password" id="password" class="form-control" name="password" required>
 			</div>
 			<button type="submit" class="btn btn-primary btn-block">Sign In</button>
 		</form>
