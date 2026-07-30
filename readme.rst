@@ -59,13 +59,12 @@ Or download the ZIP file from GitHub and extract it to your local server directo
 - Open the `application/config/database.php` file
 - Update the database connection settings with your local credentials:
 
-```php
-'hostname' => 'localhost',
-'username' => 'your_database_username',
-'password' => 'your_database_password',
-'database' => 'your_database_name',
+.. code-block:: php
 
-```
+    'hostname' => 'localhost',
+    'username' => 'your_database_username',
+    'password' => 'your_database_password',
+    'database' => 'your_database_name',
 
 4. **Import the SQL Database**
 
@@ -79,9 +78,9 @@ Or download the ZIP file from GitHub and extract it to your local server directo
 
 - Update the $config['base_url'] parameter:
 
-```php
-	$config['base_url'] = 'http://localhost/your-repository-name/';
-```
+.. code-block:: php
+
+    $config['base_url'] = 'http://localhost/your-repository-name/';
 
 6. **Run the Application**
 - By default the working running commnad is:
