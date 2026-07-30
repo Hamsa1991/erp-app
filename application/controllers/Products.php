@@ -82,11 +82,25 @@ class Products extends Web_Controller {
 		$this->require_api_auth();
 		$this->require_permission('manage_products');
 
+		$user = $this->auth_service->current_user();
+		$scope = $this->warehouse_service->get_user_warehouse_scope($user);
+
 		$params = array(
 			'page' => $this->input->get('page'),
 			'per_page' => $this->input->get('per_page') ?: 10,
 			'search' => $this->input->get('search'),
 		);
+
+		// If user has a warehouse scope, filter products by that warehouse
+		if ($scope !== NULL && $scope !== FALSE)
+		{
+			$params['warehouse_id'] = $scope;
+		}
+		// If admin and warehouse_id is provided in request, use that
+		elseif ($this->input->get('warehouse_id'))
+		{
+			$params['warehouse_id'] = $this->input->get('warehouse_id');
+		}
 
 		$result = $this->product_service->list_paginated_for_manage($params);
 		$this->json_success($result['data']);
@@ -96,6 +110,18 @@ class Products extends Web_Controller {
 	{
 		$this->require_api_auth();
 		$this->require_permission('view_products');
+
+		$user = $this->auth_service->current_user();
+		$scope = $this->warehouse_service->get_user_warehouse_scope($user);
+
+		// If user has a warehouse scope, filter products by that warehouse
+		if ($scope !== NULL && $scope !== FALSE)
+		{
+			$result = $this->product_service->list_by_warehouse($scope);
+			$this->json_success($result['data']);
+			return;
+		}
+
 		$result = $this->product_service->list_all();
 		$this->json_success($result['data']);
 	}

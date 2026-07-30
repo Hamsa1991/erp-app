@@ -49,42 +49,43 @@ class Product_model extends MY_Model {
 		$page = max(1, (int) (isset($params['page']) ? $params['page'] : 1));
 		$per_page = max(1, (int) (isset($params['per_page']) ? $params['per_page'] : 10));
 		$search = isset($params['search']) ? trim($params['search']) : '';
-		$warehouse_id = isset($params['warehouse_id']) ? $params['warehouse_id'] : NULL;
-		$only_available = ! empty($params['only_available']);
+		$warehouse_id = isset($params['warehouse_id']) ? (int) $params['warehouse_id'] : null;
+		$only_available = isset($params['only_available']) ? (bool) $params['only_available'] : false;
 
-		$this->db
-			->select('products.id, products.name, products.code, products.price, products.is_available, product_warehouse.quantity, product_warehouse.alert_quantity, warehouses.id AS warehouse_id, warehouses.name AS warehouse_name')
-			->from('products')
-			->join('product_warehouse', 'product_warehouse.product_id = products.id')
-			->join('warehouses', 'warehouses.id = product_warehouse.warehouse_id');
-
-		if ($only_available)
-		{
-			$this->db->where('products.is_available', 1);
-		}
-
-		if ($warehouse_id !== NULL && $warehouse_id !== '')
-		{
-			$this->db->where('product_warehouse.warehouse_id', (int) $warehouse_id);
-		}
+		$this->db->from($this->table);
 
 		if ($search !== '')
 		{
 			$this->db->group_start();
-			$this->db->like('products.name', $search);
-			$this->db->or_like('products.code', $search);
+			$this->db->like('name', $search);
+			$this->db->or_like('code', $search);
 			$this->db->group_end();
 		}
 
-		$total = $this->db->count_all_results('', FALSE);
+		if ($only_available)
+		{
+			$this->db->where('is_available', 1);
+		}
 
+		if ($warehouse_id !== null)
+		{
+			$this->db->where("{$this->table}.id IN (SELECT product_id FROM product_warehouse WHERE warehouse_id = $warehouse_id)", NULL, FALSE);
+		}
+
+		$total = $this->db->count_all_results('', FALSE);
 		$offset = ($page - 1) * $per_page;
+
 		$items = $this->db
-			->order_by('products.name', 'ASC')
-			->order_by('warehouses.name', 'ASC')
+			->order_by('name', 'ASC')
 			->limit($per_page, $offset)
 			->get()
 			->result();
+
+		// Load inventory for each product
+		$this->load->model('product_warehouse_model');
+		foreach ($items as $item) {
+			$item->inventory = $this->product_warehouse_model->get_by_product($item->id, $warehouse_id);
+		}
 
 		return array(
 			'items' => $items,
@@ -100,6 +101,7 @@ class Product_model extends MY_Model {
 		$page = max(1, (int) (isset($params['page']) ? $params['page'] : 1));
 		$per_page = max(1, (int) (isset($params['per_page']) ? $params['per_page'] : 10));
 		$search = isset($params['search']) ? trim($params['search']) : '';
+		$warehouse_id = isset($params['warehouse_id']) ? (int) $params['warehouse_id'] : null;
 
 		$this->db->from($this->table);
 
@@ -109,6 +111,12 @@ class Product_model extends MY_Model {
 			$this->db->like('name', $search);
 			$this->db->or_like('code', $search);
 			$this->db->group_end();
+		}
+
+		// If warehouse_id is provided, only show products in that warehouse
+		if ($warehouse_id !== null)
+		{
+			$this->db->where("{$this->table}.id IN (SELECT product_id FROM product_warehouse WHERE warehouse_id = $warehouse_id)", NULL, FALSE);
 		}
 
 		$total = $this->db->count_all_results('', FALSE);
@@ -127,5 +135,17 @@ class Product_model extends MY_Model {
 			'per_page' => $per_page,
 			'total_pages' => (int) ceil($total / $per_page),
 		);
+	}
+
+	public function get_by_warehouse($warehouse_id)
+	{
+		return $this->db
+			->select('products.*, product_warehouse.quantity, product_warehouse.alert_quantity')
+			->from('products')
+			->join('product_warehouse', 'product_warehouse.product_id = products.id')
+			->where('product_warehouse.warehouse_id', $warehouse_id)
+			->order_by('products.name', 'ASC')
+			->get()
+			->result();
 	}
 }

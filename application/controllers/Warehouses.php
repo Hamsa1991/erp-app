@@ -37,6 +37,46 @@ class Warehouses extends Web_Controller {
 		$this->require_api_auth();
 		$this->require_permission('view_warehouses');
 
+		$user = $this->auth_service->current_user();
+
+		// Check if user is a warehouse user
+		if ($this->is_warehouse_user($user)) {
+			// If they have a warehouse_id, only show that warehouse
+			if (!empty($user->warehouse_id)) {
+				$warehouse = $this->warehouse_service->get($user->warehouse_id);
+				if ($warehouse['success']) {
+					// Format as paginated response
+					$result = array(
+						'success' => true,
+						'data' => array(
+							'items' => array($warehouse['data']),
+							'total' => 1,
+							'page' => 1,
+							'per_page' => 10,
+							'total_pages' => 1
+						)
+					);
+					$this->json_success($result['data']);
+					return;
+				}
+			}
+
+			// No warehouse assigned
+			$result = array(
+				'success' => true,
+				'data' => array(
+					'items' => array(),
+					'total' => 0,
+					'page' => 1,
+					'per_page' => 10,
+					'total_pages' => 0
+				)
+			);
+			$this->json_success($result['data']);
+			return;
+		}
+
+		// For admin or other users with view permission
 		$params = array(
 			'page' => $this->input->get('page'),
 			'per_page' => $this->input->get('per_page') ?: 10,
@@ -52,6 +92,23 @@ class Warehouses extends Web_Controller {
 		$this->require_auth();
 		$this->require_permission_web('manage_warehouses');
 
+		$user = $this->auth_service->current_user();
+
+		// If warehouse user, redirect to browse or show limited view
+		if ($this->is_warehouse_user($user)) {
+			// Option 1: Redirect to browse
+			redirect('warehouses/browse');
+			return;
+
+			// Option 2: Or show a message
+			// $this->render('warehouses/manage', array(
+			// 	'title' => 'Manage Warehouses',
+			// 	'page_script' => 'warehouses-manage.js',
+			// 	'limited' => true,
+			// 	'warehouse_id' => $user->warehouse_id
+			// ));
+		}
+
 		$data = array(
 			'title' => 'Manage Warehouses',
 			'page_script' => 'warehouses-manage.js',
@@ -64,6 +121,22 @@ class Warehouses extends Web_Controller {
 	{
 		$this->require_api_auth();
 		$this->require_permission('view_warehouses');
+
+		$user = $this->auth_service->current_user();
+
+		// For warehouse users, only return their warehouse
+		if ($this->is_warehouse_user($user)) {
+			if (!empty($user->warehouse_id)) {
+				$result = $this->warehouse_service->get($user->warehouse_id);
+				if ($result['success']) {
+					$this->json_success(array($result['data']));
+					return;
+				}
+			}
+			$this->json_success(array());
+			return;
+		}
+
 		$result = $this->warehouse_service->list_all();
 		$this->json_success($result['data']);
 	}
@@ -80,6 +153,17 @@ class Warehouses extends Web_Controller {
 	{
 		$this->require_api_auth();
 		$this->require_permission('view_warehouses');
+
+		$user = $this->auth_service->current_user();
+
+		// Check if warehouse user can access this specific warehouse
+		if ($this->is_warehouse_user($user)) {
+			if (empty($user->warehouse_id) || (int)$user->warehouse_id !== (int)$id) {
+				$this->json_error('You do not have permission to view this warehouse', 403);
+				return;
+			}
+		}
+
 		$result = $this->warehouse_service->get($id);
 
 		if ( ! $result['success'])
@@ -95,6 +179,13 @@ class Warehouses extends Web_Controller {
 	{
 		$this->require_api_auth();
 		$this->require_permission('manage_warehouses');
+
+		// Warehouse users cannot create warehouses
+		$user = $this->auth_service->current_user();
+		if ($this->is_warehouse_user($user)) {
+			$this->json_error('You do not have permission to create warehouses', 403);
+			return;
+		}
 
 		if ($this->input->method() !== 'post')
 		{
@@ -119,6 +210,16 @@ class Warehouses extends Web_Controller {
 			return;
 		}
 
+		$user = $this->auth_service->current_user();
+
+		// Warehouse users can only update their own warehouse
+		if ($this->is_warehouse_user($user)) {
+			if (empty($user->warehouse_id) || (int)$user->warehouse_id !== (int)$id) {
+				$this->json_error('You do not have permission to update this warehouse', 403);
+				return;
+			}
+		}
+
 		$result = $this->warehouse_service->update($id, $this->get_json_input());
 
 		// Use the parent's handle_service_result method
@@ -136,6 +237,13 @@ class Warehouses extends Web_Controller {
 			return;
 		}
 
+		// Warehouse users cannot delete warehouses
+		$user = $this->auth_service->current_user();
+		if ($this->is_warehouse_user($user)) {
+			$this->json_error('You do not have permission to delete warehouses', 403);
+			return;
+		}
+
 		$result = $this->warehouse_service->delete($id);
 
 		if ( ! $result['success'])
@@ -145,5 +253,24 @@ class Warehouses extends Web_Controller {
 		}
 
 		$this->json_success(NULL, $result['message']);
+	}
+
+	// Helper method to check if user is a warehouse user
+	private function is_warehouse_user($user)
+	{
+		if (empty($user->roles))
+		{
+			return FALSE;
+		}
+
+		foreach ($user->roles as $role)
+		{
+			if ($role->name === 'user_warehouse' || $role->name === 'warehouse_user')
+			{
+				return TRUE;
+			}
+		}
+
+		return FALSE;
 	}
 }

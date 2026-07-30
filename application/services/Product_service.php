@@ -17,6 +17,16 @@ class Product_service extends Base_service {
 		return $this->success($this->CI->product_model->get_all(array(), 'name ASC'));
 	}
 
+	public function list_by_warehouse($warehouse_id)
+	{
+		if (empty($warehouse_id)) {
+			return $this->success(array());
+		}
+
+		$products = $this->CI->product_model->get_by_warehouse($warehouse_id);
+		return $this->success($products);
+	}
+
 	public function list_paginated_with_inventory(array $params = array())
 	{
 		$result = $this->CI->product_model->get_paginated_with_inventory($params);
