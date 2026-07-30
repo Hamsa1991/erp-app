@@ -59,7 +59,7 @@ Or download the ZIP file from GitHub and extract it to your local server directo
 - Open the `application/config/database.php` file
 - Update the database connection settings with your local credentials:
 
-```
+```php
 'hostname' => 'localhost',
 'username' => 'your_database_username',
 'password' => 'your_database_password',
@@ -79,21 +79,17 @@ Or download the ZIP file from GitHub and extract it to your local server directo
 
 - Update the $config['base_url'] parameter:
 
-```
-$config['base_url'] = 'http://localhost/your-repository-name/';
+```php
+	$config['base_url'] = 'http://localhost/your-repository-name/';
 ```
 
 6. **Run the Application**
 - By default the working running commnad is:
-
-```
 	php -S localhost:3000
-```
+
 - Access your application via web browser:
 
-```
 	http://localhost/your-repository-name/
-```
 
 7. **Default users for login:**
 
